@@ -1,14 +1,72 @@
 services:
   db:
     image: postgres:16
+    container_name: teamfinder_db
     env_file:
       - .env
-    container_name: teamfinder_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-team_finder}
+      POSTGRES_USER: ${POSTGRES_USER:-team_finder}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-team_finder}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-team_finder} -d ${POSTGRES_DB:-team_finder}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build: .
+    container_name: teamfinder_web
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
+    expose:
+      - "8000"
+    volumes:
+      - static_data:/app/collected_static
+      - media_data:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import socket; s=socket.create_connection(('127.0.0.1', 8000), 5); s.close()\"",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: unless-stopped
+
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: teamfinder_gateway
+    ports:
+      - "8000:80"
+    volumes:
+      - static_data:/var/html/static:ro
+      - media_data:/var/html/media:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  static_data:
+  media_data:

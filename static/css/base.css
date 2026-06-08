@@ -108,3 +108,27 @@ span svg {
 .black-button-share svg {
     margin: 0;
 }
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 32px 0 16px;
+}
+
+.pagination-link {
+    padding: 8px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.pagination-link:hover {
+    background: #f3f4f6;
+}
+
+.pagination-info {
+    color: #6b7280;
+    font-size: 14px;
+}

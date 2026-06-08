@@ -1,10 +1,9 @@
-// Profile skills UI logic
-(function(){
+(function () {
   document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("skills-container");
     if (!container) return;
 
-    const projectId = container.dataset.projectId;
+    const userId = container.dataset.userId;
     const addBtn = document.getElementById("add-skill-btn");
     const inputWrapper = document.getElementById("skill-input-wrapper");
     const input = document.getElementById("skill-input");
@@ -31,12 +30,12 @@
         return;
       }
       t = setTimeout(async () => {
-        const res = await fetch(`/projects/skills/?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/users/skills/?q=${encodeURIComponent(q)}`);
         if (!res.ok) return;
         const data = await res.json();
 
         suggestions.innerHTML = "";
-        data.forEach(s => {
+        data.forEach((s) => {
           const li = document.createElement("li");
           li.textContent = s.name;
           li.dataset.id = s.id;
@@ -44,7 +43,9 @@
           suggestions.appendChild(li);
         });
 
-        const exact = data.some(s => s.name.toLowerCase() === q.toLowerCase());
+        const exact = data.some(
+          (s) => s.name.toLowerCase() === q.toLowerCase()
+        );
         if (!exact) {
           const liNew = document.createElement("li");
           liNew.textContent = `Создать «${q}»`;
@@ -64,7 +65,7 @@
       if (li.classList.contains("create-new")) {
         await addSkillByName(li.dataset.name);
       } else if (li.dataset.id) {
-        await addSkillById(li.dataset.id);
+        await addSkillById(li.dataset.id, li.textContent);
       }
       hideInput();
     });
@@ -77,7 +78,7 @@
 
         const first = suggestions.querySelector("li");
         if (first && first.dataset.id) {
-          await addSkillById(first.dataset.id);
+          await addSkillById(first.dataset.id, first.textContent);
         } else {
           await addSkillByName(q);
         }
@@ -100,9 +101,9 @@
       if (e.target.classList.contains("remove-skill-btn")) {
         const chip = e.target.closest(".skill-chip");
         const skillId = chip.dataset.id;
-        const res = await fetch(`/projects/${projectId}/skills/${skillId}/remove/`, {
+        const res = await fetch(`/users/${userId}/skills/${skillId}/remove/`, {
           method: "POST",
-          headers: { "X-CSRFToken": getCookie("csrftoken") }
+          headers: { "X-CSRFToken": getCookie("csrftoken") },
         });
         if (res.ok) {
           chip.remove();
@@ -110,23 +111,23 @@
       }
     });
 
-    async function addSkillById(skillId) {
-      const res = await fetch(`/projects/${projectId}/skills/add/`, {
+    async function addSkillById(skillId, skillName) {
+      const res = await fetch(`/users/${userId}/skills/add/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-CSRFToken": getCookie("csrftoken"),
         },
-        body: JSON.stringify({ skill_id: skillId }),
+        body: JSON.stringify({ skill_id: Number(skillId) }),
       });
       if (res.ok) {
         const skill = await res.json();
-        appendChip(skill.id, skill.name);
+        appendChip(skill.skill_id, skill.name || skillName);
       }
     }
 
     async function addSkillByName(name) {
-      const res = await fetch(`/projects/${projectId}/skills/add/`, {
+      const res = await fetch(`/users/${userId}/skills/add/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +137,7 @@
       });
       if (res.ok) {
         const skill = await res.json();
-        appendChip(skill.id, skill.name);
+        appendChip(skill.skill_id, skill.name || name);
       }
     }
 
@@ -161,7 +162,9 @@
         for (let cookie of cookies) {
           cookie = cookie.trim();
           if (cookie.startsWith(name + "=")) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            cookieValue = decodeURIComponent(
+              cookie.substring(name.length + 1)
+            );
             break;
           }
         }
