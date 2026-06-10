@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -16,6 +17,7 @@ from users.forms import (
 from users.models import Skill, User
 
 PAGE_SIZE = 12
+SKILLS_AUTOCOMPLETE_LIMIT = 10
 
 
 def register_view(request):
@@ -114,7 +116,9 @@ def change_password_view(request):
 @require_GET
 def skills_autocomplete_view(request):
     query = request.GET.get("q", "").strip()
-    skills = Skill.objects.filter(name__istartswith=query).order_by("name")[:10]
+    skills = Skill.objects.filter(name__istartswith=query).order_by("name")[
+        :SKILLS_AUTOCOMPLETE_LIMIT
+    ]
     data = [{"id": skill.id, "name": skill.name} for skill in skills]
     return JsonResponse(data, safe=False)
 
@@ -122,9 +126,14 @@ def skills_autocomplete_view(request):
 @login_required
 @require_POST
 def skill_add_view(request, pk):
-    profile_user = get_object_or_404(User, pk=pk)
+    profile_user = User.objects.filter(pk=pk).first()
+    if profile_user is None:
+        return JsonResponse(
+            {"error": "user not found"},
+            status=HTTPStatus.NOT_FOUND,
+        )
     if profile_user != request.user:
-        return JsonResponse({"error": "forbidden"}, status=403)
+        return JsonResponse({"error": "forbidden"}, status=HTTPStatus.FORBIDDEN)
 
     try:
         payload = json.loads(request.body.decode())
@@ -137,11 +146,19 @@ def skill_add_view(request, pk):
     name = (payload.get("name") or "").strip()
 
     if skill_id:
-        skill = get_object_or_404(Skill, pk=skill_id)
+        skill = Skill.objects.filter(pk=skill_id).first()
+        if skill is None:
+            return JsonResponse(
+                {"error": "skill not found"},
+                status=HTTPStatus.NOT_FOUND,
+            )
     elif name:
         skill, created = Skill.objects.get_or_create(name=name)
     else:
-        return JsonResponse({"error": "invalid data"}, status=400)
+        return JsonResponse(
+            {"error": "invalid data"},
+            status=HTTPStatus.BAD_REQUEST,
+        )
 
     added = not profile_user.skills.filter(pk=skill.pk).exists()
     if added:
@@ -160,13 +177,26 @@ def skill_add_view(request, pk):
 @login_required
 @require_POST
 def skill_remove_view(request, pk, skill_id):
-    profile_user = get_object_or_404(User, pk=pk)
+    profile_user = User.objects.filter(pk=pk).first()
+    if profile_user is None:
+        return JsonResponse(
+            {"error": "user not found"},
+            status=HTTPStatus.NOT_FOUND,
+        )
     if profile_user != request.user:
-        return JsonResponse({"error": "forbidden"}, status=403)
+        return JsonResponse({"error": "forbidden"}, status=HTTPStatus.FORBIDDEN)
 
-    skill = get_object_or_404(Skill, pk=skill_id)
+    skill = Skill.objects.filter(pk=skill_id).first()
+    if skill is None:
+        return JsonResponse(
+            {"error": "skill not found"},
+            status=HTTPStatus.NOT_FOUND,
+        )
     if profile_user.skills.filter(pk=skill.pk).exists():
         profile_user.skills.remove(skill)
         return JsonResponse({"status": "ok"})
 
-    return JsonResponse({"error": "skill not found"}, status=404)
+    return JsonResponse(
+        {"error": "skill not found"},
+        status=HTTPStatus.NOT_FOUND,
+    )

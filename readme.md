@@ -41,12 +41,9 @@ docker compose down
 ```bash
 python3 -m venv venv
 ```
-
-**Активация:**
-
-- Windows (PowerShell): `venv\Scripts\Activate.ps1`
-- Windows (cmd): `venv\Scripts\activate`
-- Linux/Mac: `source venv/bin/activate`
+```bash
+source venv/Scripts/activate
+```
 
 ```bash
 pip install -r requirements.txt

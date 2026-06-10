@@ -4,20 +4,31 @@ import random
 from django.core.files.base import ContentFile
 from PIL import Image, ImageDraw, ImageFont
 
+AVATAR_SIZE = 128
+
+AVATAR_COLOR_STEEL_BLUE = (91, 141, 184)
+AVATAR_COLOR_SAGE_GREEN = (120, 154, 130)
+AVATAR_COLOR_TAN = (176, 137, 104)
+AVATAR_COLOR_LAVENDER = (158, 123, 168)
+AVATAR_COLOR_BLUE_GRAY = (107, 153, 178)
+AVATAR_COLOR_DUSTY_ROSE = (186, 120, 120)
+AVATAR_COLOR_OLIVE_GREEN = (130, 150, 120)
+AVATAR_COLOR_MAUVE = (150, 130, 160)
+
 AVATAR_COLORS = [
-    (91, 141, 184),
-    (120, 154, 130),
-    (176, 137, 104),
-    (158, 123, 168),
-    (107, 153, 178),
-    (186, 120, 120),
-    (130, 150, 120),
-    (150, 130, 160),
+    AVATAR_COLOR_STEEL_BLUE,
+    AVATAR_COLOR_SAGE_GREEN,
+    AVATAR_COLOR_TAN,
+    AVATAR_COLOR_LAVENDER,
+    AVATAR_COLOR_BLUE_GRAY,
+    AVATAR_COLOR_DUSTY_ROSE,
+    AVATAR_COLOR_OLIVE_GREEN,
+    AVATAR_COLOR_MAUVE,
 ]
 
 
 def generate_avatar_image(letter: str) -> ContentFile:
-    size = (128, 128)
+    size = (AVATAR_SIZE, AVATAR_SIZE)
     color = random.choice(AVATAR_COLORS)
     image = Image.new("RGB", size, color)
     draw = ImageDraw.Draw(image)

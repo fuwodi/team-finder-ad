@@ -6,71 +6,86 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0001_initial'),
+        ("users", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='skill',
-            options={'ordering': ['name'], 'verbose_name': 'навык', 'verbose_name_plural': 'Навыки'},
+            name="skill",
+            options={
+                "ordering": ["name"],
+                "verbose_name": "навык",
+                "verbose_name_plural": "Навыки",
+            },
         ),
         migrations.AlterModelOptions(
-            name='user',
-            options={'ordering': ['id'], 'verbose_name': 'пользователь', 'verbose_name_plural': 'Пользователи'},
+            name="user",
+            options={
+                "ordering": ["id"],
+                "verbose_name": "пользователь",
+                "verbose_name_plural": "Пользователи",
+            },
         ),
         migrations.AlterField(
-            model_name='skill',
-            name='name',
-            field=models.CharField(max_length=124, verbose_name='Название'),
+            model_name="skill",
+            name="name",
+            field=models.CharField(max_length=124, verbose_name="Название"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='about',
-            field=models.TextField(blank=True, max_length=256, verbose_name='О себе'),
+            model_name="user",
+            name="about",
+            field=models.TextField(blank=True, max_length=256, verbose_name="О себе"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='avatar',
-            field=models.ImageField(upload_to='avatars/', verbose_name='Аватар'),
+            model_name="user",
+            name="avatar",
+            field=models.ImageField(upload_to="avatars/", verbose_name="Аватар"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='email',
-            field=models.EmailField(max_length=254, unique=True, verbose_name='Email'),
+            model_name="user",
+            name="email",
+            field=models.EmailField(max_length=254, unique=True, verbose_name="Email"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='github_url',
-            field=models.URLField(blank=True, verbose_name='GitHub'),
+            model_name="user",
+            name="github_url",
+            field=models.URLField(blank=True, verbose_name="GitHub"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='is_active',
-            field=models.BooleanField(default=True, verbose_name='Активный'),
+            model_name="user",
+            name="is_active",
+            field=models.BooleanField(default=True, verbose_name="Активный"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='is_staff',
-            field=models.BooleanField(default=False, verbose_name='Администратор'),
+            model_name="user",
+            name="is_staff",
+            field=models.BooleanField(default=False, verbose_name="Администратор"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='name',
-            field=models.CharField(max_length=124, verbose_name='Имя'),
+            model_name="user",
+            name="name",
+            field=models.CharField(max_length=124, verbose_name="Имя"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='phone',
-            field=models.CharField(blank=True, default='', max_length=12, verbose_name='Телефон'),
+            model_name="user",
+            name="phone",
+            field=models.CharField(
+                blank=True, default="", max_length=12, verbose_name="Телефон"
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='skills',
-            field=models.ManyToManyField(blank=True, related_name='users', to='users.skill', verbose_name='Навыки'),
+            model_name="user",
+            name="skills",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="users",
+                to="users.skill",
+                verbose_name="Навыки",
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='surname',
-            field=models.CharField(max_length=124, verbose_name='Фамилия'),
+            model_name="user",
+            name="surname",
+            field=models.CharField(max_length=124, verbose_name="Фамилия"),
         ),
     ]

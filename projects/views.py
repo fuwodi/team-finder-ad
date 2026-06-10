@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
@@ -70,9 +72,17 @@ def project_edit_view(request, pk):
 @login_required
 @require_POST
 def project_complete_view(request, pk):
-    project = get_object_or_404(Project, pk=pk, owner=request.user)
+    project = Project.objects.filter(pk=pk, owner=request.user).first()
+    if project is None:
+        return JsonResponse(
+            {"error": "project not found"},
+            status=HTTPStatus.NOT_FOUND,
+        )
     if project.status != Project.STATUS_OPEN:
-        return JsonResponse({"error": "project is not open"}, status=400)
+        return JsonResponse(
+            {"error": "project is not open"},
+            status=HTTPStatus.BAD_REQUEST,
+        )
 
     project.status = Project.STATUS_CLOSED
     project.save(update_fields=["status"])
@@ -82,9 +92,17 @@ def project_complete_view(request, pk):
 @login_required
 @require_POST
 def project_toggle_participate_view(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+    project = Project.objects.filter(pk=pk).first()
+    if project is None:
+        return JsonResponse(
+            {"error": "project not found"},
+            status=HTTPStatus.NOT_FOUND,
+        )
     if project.owner_id == request.user.id:
-        return JsonResponse({"error": "owner cannot participate"}, status=400)
+        return JsonResponse(
+            {"error": "owner cannot participate"},
+            status=HTTPStatus.BAD_REQUEST,
+        )
 
     if project.participants.filter(pk=request.user.pk).exists():
         project.participants.remove(request.user)
